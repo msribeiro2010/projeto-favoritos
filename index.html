@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visualizador de Favoritos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      --background-color: #f8fafc;
+      --card-background: #ffffff;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --border-color: #e2e8f0;
+      --category-trabalho: #059669;
+      --category-curso: #0284c7;
+      --category-livros: #7c3aed;
+      --category-outros: #475569;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--background-color);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .app-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+    }
+
+    .app-description {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .upload-container {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 3rem;
+      background: var(--card-background);
+      border-radius: 1rem;
+      box-shadow: var(--shadow-lg);
+      border: 2px dashed var(--border-color);
+      transition: all 0.3s ease;
+    }
+
+    .upload-container:hover {
+      border-color: var(--primary-color);
+      transform: translateY(-2px);
+    }
+
+    .file-input-wrapper {
+      display: inline-block;
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    .file-input-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 500;
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .file-input-label:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .controls {
+      background: var(--card-background);
+      padding: 1.5rem;
+      border-radius: 1rem;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 2rem;
+    }
+
+    .search-container {
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 1rem 1.5rem;
+      border: 2px solid var(--border-color);
+      border-radius: 0.75rem;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background-color: var(--card-background);
+      color: var(--text-primary);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .search-stats {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .filter-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem 0;
+    }
+
+    .filter-section {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-section span {
+      color: var(--text-secondary);
+      font-weight: 500;
+      min-width: 80px;
+    }
+
+    .filter-button,
+    .sort-button {
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.75rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border: 1px solid var(--border-color);
+      background: linear-gradient(to bottom, #ffffff, #f8fafc);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05),
+                 inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .filter-button:hover,
+    .sort-button:hover {
+      background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                 0 2px 4px -1px rgba(0, 0, 0, 0.06),
+                 inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .filter-button:active,
+    .sort-button:active {
+      transform: translateY(0);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-button.active,
+    .sort-button.active {
+      background: linear-gradient(to bottom, var(--primary-color), var(--primary-hover));
+      color: white;
+      border-color: var(--primary-hover);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .category-group {
+      background: var(--card-background);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 2rem;
+      transition: transform 0.3s ease;
+    }
+
+    .category-group:hover {
+      transform: translateY(-2px);
+    }
+
+    .category-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .category-header h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .category-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    .link-card {
+      background: var(--card-background);
+      padding: 1.25rem;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border-color);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .link-card.frequently-accessed {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+      border-color: var(--primary-hover);
+    }
+
+    .link-card.frequently-accessed .link-title,
+    .link-card.frequently-accessed .time-info,
+    .link-card.frequently-accessed .count-info {
+      color: white;
+    }
+
+    .link-card.frequently-accessed .category-tag {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
+    .link-card.frequently-accessed .category-selector {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .link-card.frequently-accessed .delete-button {
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .link-card.frequently-accessed .delete-button:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .card-content {
+      cursor: pointer;
+    }
+
+    .link-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary-color);
+    }
+
+    .link-card-actions {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      display: flex;
+      gap: 0.5rem;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .link-card:hover .link-card-actions {
+      opacity: 1;
+    }
+
+    .delete-button {
+      background: none;
+      border: none;
+      padding: 0.4rem;
+      cursor: pointer;
+      color: #ef4444;
+      border-radius: 0.375rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .delete-button:hover {
+      background-color: #fee2e2;
+      transform: scale(1.1);
+    }
+
+    .delete-button svg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    .link-title {
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+      line-height: 1.4;
+    }
+
+    .link-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-top: 1rem;
+    }
+
+    .access-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .time-info {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .count-info {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--primary-color);
+    }
+
+    .category-tag {
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      color: white;
+    }
+
+    .highlight {
+      background-color: #fef9c3;
+      padding: 0.1rem 0.25rem;
+      border-radius: 0.25rem;
+    }
+
+    .category-selector {
+      padding: 0.4rem;
+      font-size: 0.85rem;
+      background: var(--background-color);
+      border: 1px solid var(--border-color);
+      border-radius: 0.375rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .category-selector:hover {
+      border-color: var(--primary-color);
+    }
+
+    .empty-state, .empty-search {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-secondary);
+      background: var(--card-background);
+      border-radius: 1rem;
+      box-shadow: var(--shadow-md);
+      font-size: 1.1rem;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .controls {
+        padding: 1rem;
+      }
+
+      .search-container {
+        flex-direction: column;
+      }
+
+      .category-content {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-section {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filter-section span {
+        margin-bottom: 0.5rem;
+      }
+
+      .filter-button,
+      .sort-button {
+        width: 100%;
+        text-align: center;
+      }
+    }
+
+    /* Animações */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .category-group {
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    .link-card {
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    /* Animação de remoção */
+    @keyframes fadeOut {
+      from { opacity: 1; transform: scale(1); }
+      to { opacity: 0; transform: scale(0.9); }
+    }
+
+    .link-card.removing {
+      animation: fadeOut 0.3s ease forwards;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-header">
+    <h1>📚 Gerenciador de Favoritos</h1>
+    <p class="app-description">
+      Organize e acesse seus favoritos de forma inteligente. Categorize, pesquise e mantenha seus links importantes sempre à mão.
+    </p>
+  </div>
+
+  <div class="upload-container">
+    <div class="file-input-wrapper">
+      <label for="fileInput" class="file-input-label">
+        Escolher arquivo de favoritos
+      </label>
+      <input type="file" id="fileInput" accept=".html" aria-label="Selecionar arquivo de favoritos">
+    </div>
+  </div>
+
+  <div class="controls" id="controls" style="display: none;">
+    <div class="search-container">
+      <input 
+        type="text" 
+        id="searchInput" 
+        class="search-input" 
+        placeholder="Buscar favoritos por título ou URL..."
+        aria-label="Buscar favoritos"
+      >
+      <div class="search-stats" id="searchStats"></div>
+    </div>
+
+    <div class="filter-controls">
+      <div class="filter-section">
+        <span>Filtrar por:</span>
+        <button class="filter-button active" data-category="all">Todos</button>
+        <button class="filter-button" data-category="trabalho">Trabalho</button>
+        <button class="filter-button" data-category="curso">Cursos</button>
+        <button class="filter-button" data-category="livros">Livros</button>
+        <button class="filter-button" data-category="outros">Outros</button>
+      </div>
+
+      <div class="filter-section">
+        <span>Ordenar por:</span>
+        <button class="sort-button active" data-sort="most-accessed">Mais acessados</button>
+        <button class="sort-button" data-sort="recent">Mais recentes</button>
+        <button class="sort-button" data-sort="name">Nome</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="category-groups" id="linkContainer">
+    <div class="empty-state">
+      Selecione um arquivo de favoritos para começar
+    </div>
+  </div>
+
+  <script>
+    // Gerenciamento do estado dos favoritos
+    const favoritesState = {
+      items: [],
+      sortBy: 'most-accessed',
+      filterCategory: 'all',
+      searchQuery: '',
+
+      // Carregar favoritos salvos
+      loadFavorites() {
+        const stored = localStorage.getItem('favoritesList');
+        if (stored) {
+          this.items = JSON.parse(stored);
+          return true;
+        }
+        return false;
+      },
+
+      // Salvar favoritos
+      saveFavorites() {
+        localStorage.setItem('favoritesList', JSON.stringify(this.items));
+      },
+
+      // Carregar dados do localStorage
+      load() {
+        const stored = localStorage.getItem('favoritesAccess');
+        return stored ? JSON.parse(stored) : {};
+      },
+
+      // Carregar contadores de acesso
+      loadAccessCounts() {
+        const stored = localStorage.getItem('favoritesAccessCount');
+        return stored ? JSON.parse(stored) : {};
+      },
+
+      // Salvar contadores de acesso
+      saveAccessCounts(data) {
+        localStorage.setItem('favoritesAccessCount', JSON.stringify(data));
+      },
+
+      // Obter número de acessos
+      getAccessCount(url) {
+        const counts = this.loadAccessCounts();
+        return counts[url] || 0;
+      },
+
+      // Incrementar contador de acessos
+      incrementAccessCount(url) {
+        const counts = this.loadAccessCounts();
+        counts[url] = (counts[url] || 0) + 1;
+        this.saveAccessCounts(counts);
+        return counts[url];
+      },
+
+      // Salvar dados no localStorage
+      save(data) {
+        localStorage.setItem('favoritesAccess', JSON.stringify(data));
+      },
+
+      // Carregar categorias
+      loadCategories() {
+        const stored = localStorage.getItem('favoritesCategories');
+        return stored ? JSON.parse(stored) : {};
+      },
+
+      // Salvar categorias
+      saveCategories(data) {
+        localStorage.setItem('favoritesCategories', JSON.stringify(data));
+      },
+
+      // Atualizar último acesso
+      updateAccess(url) {
+        const accessData = this.load();
+        accessData[url] = new Date().toISOString();
+        this.save(accessData);
+        this.incrementAccessCount(url);
+      },
+
+      // Obter último acesso
+      getLastAccess(url) {
+        const accessData = this.load();
+        return accessData[url] || null;
+      },
+
+      // Definir categoria
+      setCategory(url, category) {
+        const categories = this.loadCategories();
+        categories[url] = category;
+        this.saveCategories(categories);
+        renderLinks();
+      },
+
+      // Verificar se é um link do PJe
+      isPjeLink(url, title) {
+        const pjeKeywords = ['pje', 'projudi', 'processo judicial', 'processo eletrônico'];
+        const lowerUrl = url.toLowerCase();
+        const lowerTitle = title.toLowerCase();
+        return pjeKeywords.some(keyword => lowerUrl.includes(keyword) || lowerTitle.includes(keyword));
+      },
+
+      // Obter categoria
+      getCategory(url, title) {
+        const categories = this.loadCategories();
+        if (categories[url]) {
+          // Migrar itens da categoria 'entretenimento' para 'trabalho'
+          if (categories[url] === 'entretenimento') {
+            categories[url] = 'trabalho';
+            this.saveCategories(categories);
+          }
+          return categories[url];
+        }
+        
+        // Auto-categorização baseada em palavras-chave
+        const lowerTitle = title.toLowerCase();
+        const lowerUrl = url.toLowerCase();
+
+        const keywords = {
+          trabalho: ['work', 'github', 'gitlab', 'jira', 'confluence', 'docs', 'documentação', 'projeto', 'tribunal', 'jurídico', 'judicial', 'processo', 'game', 'jogo', 'hobby', 'música', 'music', 'spotify', 'youtube', 'netflix', 'prime', 'movie', 'filme', 'série', 'series', 'tv', 'entertainment'],
+          curso: ['course', 'curso', 'learn', 'aprender', 'tutorial', 'udemy', 'coursera', 'education'],
+          livros: ['book', 'livro', 'read', 'ler', 'kindle', 'amazon', 'goodreads']
+        };
+
+        for (const [category, words] of Object.entries(keywords)) {
+          if (words.some(word => lowerTitle.includes(word) || lowerUrl.includes(word))) {
+            return category;
+          }
+        }
+
+        return 'outros';
+      },
+
+      // Verificar se um link está funcionando
+      async checkLink(url) {
+        try {
+          const response = await fetch(url, { method: 'HEAD', mode: 'no-cors' });
+          return true;
+        } catch (error) {
+          return false;
+        }
+      },
+
+      // Remover links quebrados do localStorage
+      removeBrokenLink(url) {
+        const accessData = this.load();
+        const categories = this.loadCategories();
+        
+        delete accessData[url];
+        delete categories[url];
+        
+        this.save(accessData);
+        this.saveCategories(categories);
+      },
+
+      // Ordenar items
+      sort() {
+        const accessData = this.load();
+        const accessCounts = this.loadAccessCounts();
+        let sortedItems = [...this.items]; // Criar uma cópia para não modificar o array original
+        
+        switch (this.sortBy) {
+          case 'recent':
+            sortedItems.sort((a, b) => {
+              const aDate = accessData[a.href] || '1970-01-01';
+              const bDate = accessData[b.href] || '1970-01-01';
+              return new Date(bDate) - new Date(aDate);
+            });
+            break;
+            
+          case 'most-accessed':
+            sortedItems.sort((a, b) => {
+              const aCount = accessCounts[a.href] || 0;
+              const bCount = accessCounts[b.href] || 0;
+              if (bCount === aCount) {
+                // Se tiverem o mesmo número de acessos, ordena pelo mais recente
+                const aDate = accessData[a.href] || '1970-01-01';
+                const bDate = accessData[b.href] || '1970-01-01';
+                return new Date(bDate) - new Date(aDate);
+              }
+              return bCount - aCount;
+            });
+            break;
+            
+          case 'name':
+            sortedItems.sort((a, b) => {
+              return a.title.localeCompare(b.title, 'pt-BR');
+            });
+            break;
+        }
+        
+        return sortedItems;
+      },
+
+      // Limpar todos os dados
+      clearAll() {
+        if (confirm('Tem certeza que deseja limpar todos os favoritos?')) {
+          localStorage.removeItem('favoritesList');
+          localStorage.removeItem('favoritesAccess');
+          localStorage.removeItem('favoritesAccessCount');
+          localStorage.removeItem('favoritesCategories');
+          this.items = [];
+          renderLinks();
+        }
+      },
+
+      // Filtrar items por busca
+      filterBySearch(items) {
+        if (!this.searchQuery) return items;
+        
+        const query = this.searchQuery.toLowerCase();
+        return items.filter(item => {
+          const titleMatch = item.title.toLowerCase().includes(query);
+          const urlMatch = item.href.toLowerCase().includes(query);
+          return titleMatch || urlMatch;
+        });
+      },
+
+      // Destacar texto encontrado
+      highlightText(text, query) {
+        if (!query) return text;
+        
+        const regex = new RegExp(`(${query})`, 'gi');
+        return text.replace(regex, '<span class="highlight">$1</span>');
+      },
+
+      // Remover favorito
+      removeFavorite(url) {
+        // Remover do array de items
+        this.items = this.items.filter(item => item.href !== url);
+        
+        // Remover dos dados salvos
+        const accessData = this.load();
+        const categories = this.loadCategories();
+        const accessCounts = this.loadAccessCounts();
+        
+        delete accessData[url];
+        delete categories[url];
+        delete accessCounts[url];
+        
+        this.save(accessData);
+        this.saveCategories(categories);
+        this.saveAccessCounts(accessCounts);
+        this.saveFavorites();
+      }
+    };
+
+    // Formatar data relativa
+    function formatRelativeDate(dateStr) {
+      if (!dateStr) return 'Nunca acessado';
+      
+      const date = new Date(dateStr);
+      const now = new Date();
+      const diff = now - date;
+      const seconds = Math.floor(diff / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(minutes / 60);
+      const days = Math.floor(hours / 24);
+
+      if (days > 0) return `Acessado há ${days} dia${days > 1 ? 's' : ''}`;
+      if (hours > 0) return `Acessado há ${hours} hora${hours > 1 ? 's' : ''}`;
+      if (minutes > 0) return `Acessado há ${minutes} minuto${minutes > 1 ? 's' : ''}`;
+      return 'Acessado agora';
+    }
+
+    // Criar seletor de categoria
+    function createCategorySelector(item, currentCategory) {
+      const select = document.createElement('select');
+      select.className = 'category-selector';
+      
+      const categories = [
+        ['trabalho', 'Trabalho'],
+        ['curso', 'Cursos'],
+        ['livros', 'Livros'],
+        ['outros', 'Outros']
+      ];
+
+      categories.forEach(([value, label]) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = label;
+        option.selected = value === currentCategory;
+        select.appendChild(option);
+      });
+
+      select.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+
+      select.addEventListener('change', (e) => {
+        e.stopPropagation();
+        favoritesState.setCategory(item.href, e.target.value);
+      });
+
+      return select;
+    }
+
+    // Renderizar links
+    function renderLinks() {
+      const container = document.getElementById('linkContainer');
+      container.innerHTML = '';
+      
+      const sortedItems = favoritesState.sort();
+      
+      // Criar grupos de categoria
+      const groups = {
+        trabalho: { title: 'Trabalho', items: [] },
+        curso: { title: 'Cursos', items: [] },
+        livros: { title: 'Livros', items: [] },
+        outros: { title: 'Outros', items: [] }
+      };
+      
+      // Filtrar por busca e distribuir items nos grupos
+      const filteredItems = favoritesState.filterBySearch(sortedItems);
+      
+      // Atualizar estatísticas de busca
+      updateSearchStats(filteredItems.length, sortedItems.length);
+      
+      if (filteredItems.length === 0) {
+        container.innerHTML = '<div class="empty-search">Nenhum favorito encontrado para esta busca</div>';
+        return;
+      }
+      
+      filteredItems.forEach(item => {
+        const category = favoritesState.getCategory(item.href, item.title);
+        if (favoritesState.filterCategory === 'all' || favoritesState.filterCategory === category) {
+          groups[category].items.push(item);
+        }
+      });
+
+      // Renderizar grupos
+      Object.entries(groups).forEach(([category, group]) => {
+        if (group.items.length === 0) return;
+
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'category-group';
+
+        const header = document.createElement('div');
+        header.className = 'category-header';
+        header.setAttribute('data-category', category);
+
+        const title = document.createElement('h2');
+        title.textContent = `${group.title} (${group.items.length})`;
+        header.appendChild(title);
+
+        const content = document.createElement('div');
+        content.className = 'category-content';
+
+        group.items.forEach(item => {
+          const lastAccess = favoritesState.getLastAccess(item.href);
+          const accessCount = favoritesState.getAccessCount(item.href);
+          const category = favoritesState.getCategory(item.href, item.title);
+          
+          const card = document.createElement('div');
+          card.className = 'link-card';
+          
+          // Adicionar classe para cards frequentemente acessados
+          if (accessCount >= 5) { // Você pode ajustar este número conforme necessário
+            card.classList.add('frequently-accessed');
+          }
+
+          const cardContent = document.createElement('div');
+          cardContent.className = 'card-content';
+          cardContent.onclick = () => {
+            favoritesState.updateAccess(item.href);
+            window.open(item.href, '_blank');
+            renderLinks();
+          };
+          
+          // Criar container para ações
+          const actions = document.createElement('div');
+          actions.className = 'link-card-actions';
+          actions.onclick = (e) => e.stopPropagation();
+          
+          // Criar botão de deletar
+          const deleteButton = document.createElement('button');
+          deleteButton.className = 'delete-button';
+          deleteButton.title = 'Remover favorito';
+          deleteButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m4-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          `;
+          
+          deleteButton.onclick = (e) => {
+            e.stopPropagation(); // Evitar abrir o link ao clicar no botão
+            if (confirm('Tem certeza que deseja remover este favorito?')) {
+              card.classList.add('removing');
+              setTimeout(() => {
+                favoritesState.removeFavorite(item.href);
+                renderLinks();
+              }, 300);
+            }
+          };
+          
+          // Adicionar seletor de categoria aos actions
+          const categorySelector = createCategorySelector(item, category);
+          actions.appendChild(categorySelector);
+          actions.appendChild(deleteButton);
+          
+          const title = document.createElement('div');
+          title.className = 'link-title';
+          title.innerHTML = favoritesState.highlightText(item.title, favoritesState.searchQuery);
+          
+          const meta = document.createElement('div');
+          meta.className = 'link-meta';
+          
+          const accessInfo = document.createElement('div');
+          accessInfo.className = 'access-info';
+          
+          const timeInfo = document.createElement('span');
+          timeInfo.className = 'time-info';
+          timeInfo.textContent = formatRelativeDate(lastAccess);
+          
+          const countInfo = document.createElement('span');
+          countInfo.className = 'count-info';
+          countInfo.textContent = `${accessCount} ${accessCount === 1 ? 'acesso' : 'acessos'}`;
+          
+          accessInfo.appendChild(timeInfo);
+          accessInfo.appendChild(countInfo);
+          
+          const categoryTag = document.createElement('span');
+          categoryTag.className = 'category-tag';
+          categoryTag.setAttribute('data-category', category);
+          categoryTag.textContent = groups[category].title;
+          
+          meta.appendChild(accessInfo);
+          meta.appendChild(categoryTag);
+          
+          cardContent.appendChild(title);
+          cardContent.appendChild(meta);
+          
+          card.appendChild(actions);
+          card.appendChild(cardContent);
+          
+          content.appendChild(card);
+        });
+
+        groupDiv.appendChild(header);
+        groupDiv.appendChild(content);
+        container.appendChild(groupDiv);
+      });
+    }
+
+    // Atualizar estatísticas de busca
+    function updateSearchStats(filteredCount, totalCount) {
+      const stats = document.getElementById('searchStats');
+      if (favoritesState.searchQuery) {
+        stats.textContent = `${filteredCount} de ${totalCount} favoritos encontrados`;
+      } else {
+        stats.textContent = `${totalCount} favoritos no total`;
+      }
+    }
+
+    // Configurar controles de filtro
+    document.querySelectorAll('.filter-button').forEach(button => {
+      button.addEventListener('click', () => {
+        // Remover classe active de todos os botões de filtro
+        document.querySelectorAll('.filter-button').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        
+        // Adicionar classe active ao botão clicado
+        button.classList.add('active');
+        
+        // Atualizar categoria de filtro e renderizar
+        favoritesState.filterCategory = button.dataset.category;
+        
+        // Forçar re-renderização
+        renderLinks();
+      });
+    });
+
+    // Configurar controles de ordenação
+    document.querySelectorAll('.sort-button').forEach(button => {
+      button.addEventListener('click', () => {
+        // Remover classe active de todos os botões de ordenação
+        document.querySelectorAll('.sort-button').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        
+        // Adicionar classe active ao botão clicado
+        button.classList.add('active');
+        
+        // Atualizar critério de ordenação e renderizar
+        favoritesState.sortBy = button.dataset.sort;
+        
+        // Forçar re-renderização
+        renderLinks();
+      });
+    });
+
+    // Adicionar botão de limpar dados
+    const controls = document.getElementById('controls');
+    const clearButton = document.createElement('button');
+    clearButton.className = 'filter-button';
+    clearButton.textContent = 'Limpar Favoritos';
+    clearButton.onclick = () => favoritesState.clearAll();
+    controls.appendChild(clearButton);
+
+    // Manipular upload do arquivo
+    document.getElementById('fileInput').addEventListener('change', async function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const text = await file.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(text, 'text/html');
+      const links = doc.querySelectorAll('a');
+
+      if (links.length === 0) {
+        document.getElementById('controls').style.display = 'none';
+        document.getElementById('linkContainer').innerHTML = 
+          '<div class="empty-state">Nenhum favorito encontrado no arquivo</div>';
+        return;
+      }
+
+      // Mostrar controles
+      document.getElementById('controls').style.display = 'flex';
+
+      // Verificar e filtrar links
+      const validLinks = [];
+      const totalLinks = links.length;
+      let processedLinks = 0;
+
+      // Adicionar mensagem de progresso
+      const container = document.getElementById('linkContainer');
+      container.innerHTML = '<div class="empty-state">Verificando links... 0%</div>';
+
+      for (const link of links) {
+        try {
+          const url = new URL(link.href);
+          if (url.protocol === 'http:' || url.protocol === 'https:') {
+            validLinks.push({
+              href: link.href,
+              title: link.textContent || link.href
+            });
+          }
+        } catch (e) {
+          // Ignorar URLs inválidas
+        }
+        
+        processedLinks++;
+        container.innerHTML = `<div class="empty-state">Verificando links... ${Math.round((processedLinks/totalLinks) * 100)}%</div>`;
+      }
+
+      // Atualizar estado
+      favoritesState.items = validLinks;
+      favoritesState.saveFavorites(); // Salvar os novos favoritos
+
+      // Renderizar links
+      renderLinks();
+    });
+
+    // Configurar busca
+    const searchInput = document.getElementById('searchInput');
+    let searchTimeout;
+
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        favoritesState.searchQuery = e.target.value.trim();
+        renderLinks();
+      }, 300); // Debounce de 300ms
+    });
+
+    // Carregar favoritos salvos ao iniciar
+    window.addEventListener('load', () => {
+      if (favoritesState.loadFavorites()) {
+        document.getElementById('controls').style.display = 'flex';
+        renderLinks();
+      }
+    });
+  </script>
+</body>
+</html>
